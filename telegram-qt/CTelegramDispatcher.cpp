@@ -2575,6 +2575,7 @@ CTelegramConnection *CTelegramDispatcher::createConnection()
     connect(connection, SIGNAL(phoneStatusReceived(QString,bool)), SIGNAL(phoneStatusReceived(QString,bool)));
 
 #ifndef TELEGRAMQT_NO_DEPRECATED
+    connect(connection, SIGNAL(authorizationErrorReceived(TelegramNamespace::UnauthorizedError,QString)), SIGNAL(authorizationErrorReceived()));
     connect(connection, SIGNAL(phoneStatusReceived(QString,bool)), SLOT(whenPhoneStatusReceived(QString,bool)));
 #endif
 
@@ -2582,7 +2583,8 @@ CTelegramConnection *CTelegramDispatcher::createConnection()
     connect(connection,
             SIGNAL(authSignErrorReceived(TelegramNamespace::AuthSignError,QString)),
             SIGNAL(authSignErrorReceived(TelegramNamespace::AuthSignError,QString)));
-    connect(connection, SIGNAL(authorizationErrorReceived()), SIGNAL(authorizationErrorReceived()));
+
+    connect(connection, SIGNAL(authorizationErrorReceived(TelegramNamespace::UnauthorizedError,QString)), SIGNAL(authorizationErrorReceived(TelegramNamespace::UnauthorizedError,QString)));
 
     connect(connection, SIGNAL(fileDataReceived(TLUploadFile,quint32,quint32)), SLOT(whenFileDataReceived(TLUploadFile,quint32,quint32)));
 

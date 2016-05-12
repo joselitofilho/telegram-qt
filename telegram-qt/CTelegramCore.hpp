@@ -155,6 +155,7 @@ Q_SIGNALS:
     void messageReceived(const TelegramNamespace::Message &message);
 
 #ifndef TELEGRAMQT_NO_DEPRECATED
+    void authorizationErrorReceived();
     void phoneStatusReceived(const QString &phone, bool registered, bool invited);
     void messageReceived(const QString &contact, const QString &message, TelegramNamespace::MessageType type, quint32 messageId, quint32 flags, quint32 timestamp);
     void chatMessageReceived(quint32 chatId, const QString &contact, const QString &message, TelegramNamespace::MessageType type, quint32 messageId, quint32 flags, quint32 timestamp);
@@ -170,7 +171,7 @@ Q_SIGNALS:
     void chatAdded(quint32 publichChatId);
     void chatChanged(quint32 publichChatId);
 
-    void authorizationErrorReceived();
+    void authorizationErrorReceived(TelegramNamespace::UnauthorizedError errorCode, const QString &errorMessage);
 
     void userNameStatusUpdated(const QString &userName, TelegramNamespace::AccountUserNameStatus status);
     void uploadingStatusUpdated(quint32 requestId, quint32 currentOffset, quint32 size);
