@@ -35,7 +35,7 @@ public:
     explicit CTelegramCore(QObject *parent = 0);
     ~CTelegramCore();
 
-    inline const CAppInformation *appInfo() { return m_appInfo; }
+    const CAppInformation *appInfo() { return m_appInfo; }
     void setAppInformation(const CAppInformation *newAppInfo);
 
     Q_INVOKABLE static QVector<TelegramNamespace::DcOption> builtInDcs();
@@ -133,9 +133,9 @@ public Q_SLOTS:
         }
     }
 
-    inline void setMessageReceivingFilterFlags(TelegramNamespace::MessageFlags flags) { setMessageReceivingFilter(flags); }
-    inline bool initConnection(const QString &address, quint32 port) { return initConnection(QVector<TelegramNamespace::DcOption>() << TelegramNamespace::DcOption(address, port)); }
-    inline void setTyping(const QString &contact, bool typing) { return setTyping(contact, typing ? TelegramNamespace::MessageActionTyping : TelegramNamespace::MessageActionNone); }
+    void setMessageReceivingFilterFlags(TelegramNamespace::MessageFlags flags) { setMessageReceivingFilter(flags); }
+    bool initConnection(const QString &address, quint32 port) { return initConnection(QVector<TelegramNamespace::DcOption>() << TelegramNamespace::DcOption(address, port)); }
+    void setTyping(const QString &contact, bool typing) { return setTyping(contact, typing ? TelegramNamespace::MessageActionTyping : TelegramNamespace::MessageActionNone); }
 #endif
 
 Q_SIGNALS:
