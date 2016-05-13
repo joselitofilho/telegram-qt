@@ -239,6 +239,9 @@ protected slots:
     void whenPackageRedirected(const QByteArray &data, quint32 dc);
     void whenWantedActiveDcChanged(quint32 dc);
 
+    void onUnauthorizedErrorReceived(TelegramNamespace::UnauthorizedError errorCode);
+    void onPasswordReceived(const TLAccountPassword &password);
+
 #ifndef TELEGRAMQT_NO_DEPRECATED
     void whenPhoneStatusReceived(const QString &phone, bool registered);
 #endif

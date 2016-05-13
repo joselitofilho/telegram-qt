@@ -2224,6 +2224,22 @@ void CTelegramDispatcher::whenWantedActiveDcChanged(quint32 dc)
     }
 }
 
+void CTelegramDispatcher::onUnauthorizedErrorReceived(TelegramNamespace::UnauthorizedError errorCode)
+{
+    switch (errorCode) {
+    case TelegramNamespace::UnauthorizedSessionPasswordNeeded:
+        activeConnection()->accountGetPassword();
+        break;
+    default:
+        break;
+    }
+}
+
+void CTelegramDispatcher::onPasswordReceived(const TLAccountPassword &password)
+{
+    qDebug() << Q_FUNC_INFO << password;
+}
+
 #ifndef TELEGRAMQT_NO_DEPRECATED
 void CTelegramDispatcher::whenPhoneStatusReceived(const QString &phone, bool registered)
 {

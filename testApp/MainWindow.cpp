@@ -85,6 +85,8 @@ MainWindow::MainWindow(QWidget *parent) :
             SLOT(whenPhoneStatusReceived(QString,bool,bool)));
     connect(m_core, SIGNAL(phoneCodeRequired()),
             SLOT(whenPhoneCodeRequested()));
+    connect(m_core, SIGNAL(authorizationErrorReceived(TelegramNamespace::UnauthorizedError,QString)),
+            SLOT(whenUnauthorizedErrorReceived(TelegramNamespace::AuthSignError,QString)));
     connect(m_core, SIGNAL(authSignErrorReceived(TelegramNamespace::AuthSignError,QString)),
             SLOT(whenAuthSignErrorReceived(TelegramNamespace::AuthSignError,QString)));
     connect(m_core, SIGNAL(contactListChanged()),
@@ -202,6 +204,12 @@ void MainWindow::whenPhoneStatusReceived(const QString &phone, bool registered, 
 void MainWindow::whenPhoneCodeRequested()
 {
     setAppState(AppStateCodeSent);
+}
+
+void MainWindow::whenUnauthorizedErrorReceived(TelegramNamespace::UnauthorizedError errorCode, const QString &errorMessage)
+{
+    QToolTip::showText(ui->confirmationCode->mapToGlobal(QPoint(0, 0)), errorMessage);
+    qDebug() << errorCode << errorMessage;
 }
 
 void MainWindow::whenAuthSignErrorReceived(TelegramNamespace::AuthSignError errorCode, const QString &errorMessage)

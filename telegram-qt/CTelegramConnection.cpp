@@ -2042,6 +2042,9 @@ void CTelegramConnection::processRpcResult(CTelegramStream &stream, quint64 idHi
         case TLValue::AccountCheckUsername:
             processingResult = processAccountCheckUsername(stream, id);
             break;
+        case TLValue::AccountGetPassword:
+            processingResult = processAccountGetPassword(stream, id);
+            break;
         case TLValue::AccountUpdateStatus:
             processingResult = processAccountUpdateStatus(stream, id);
             break;
@@ -2766,6 +2769,25 @@ TLValue CTelegramConnection::processAccountCheckUsername(CTelegramStream &stream
     }
 
     return result;
+}
+
+TLValue CTelegramConnection::processAccountGetPassword(CTelegramStream &stream, quint64 id)
+{
+    Q_UNUSED(id);
+
+    TLAccountPassword result;
+    stream >> result;
+
+    switch (result.tlType) {
+    case TLValue::AccountNoPassword:
+    case TLValue::AccountPassword:
+        emit passwordReceived(result);
+        break;
+    default:
+        break;
+    }
+
+    return result.tlType;
 }
 
 TLValue CTelegramConnection::processAccountUpdateStatus(CTelegramStream &stream, quint64 id)

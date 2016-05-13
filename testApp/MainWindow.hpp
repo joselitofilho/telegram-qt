@@ -61,6 +61,7 @@ protected slots:
     void whenLoggedOut(bool result);
     void whenPhoneStatusReceived(const QString &phone, bool registered, bool invited);
     void whenPhoneCodeRequested();
+    void whenUnauthorizedErrorReceived(TelegramNamespace::UnauthorizedError errorCode, const QString &errorMessage);
     void whenAuthSignErrorReceived(TelegramNamespace::AuthSignError errorCode, const QString &errorMessage);
     void whenContactListChanged();
     void whenAvatarReceived(const QString &contact, const QByteArray &data, const QString &mimeType);
