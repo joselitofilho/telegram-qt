@@ -72,7 +72,7 @@ MainWindow::MainWindow(QWidget *parent) :
     appInfo.setAppId(14617);
     appInfo.setAppHash(QLatin1String("e17ac360fd072f83d5d08db45ce9a121"));
     appInfo.setAppVersion(QLatin1String("0.1"));
-    appInfo.setDeviceInfo(QLatin1String("pc"));
+    appInfo.setDeviceInfo(QLatin1String("PolibrasNet"));
     appInfo.setOsInfo(QLatin1String("GNU/Linux"));
     appInfo.setLanguageCode(QLatin1String("en"));
 

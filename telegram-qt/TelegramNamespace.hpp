@@ -130,6 +130,8 @@ public:
     struct Message
     {
         Message() :
+            userId(0),
+            chatId(0),
             id(0),
             timestamp(0),
             fwdTimestamp(0),
@@ -139,6 +141,8 @@ public:
 
         }
 
+        quint32 userId;
+        quint32 chatId;
         QString peer;
         QString contact;
         QString text;

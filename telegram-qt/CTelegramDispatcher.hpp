@@ -133,6 +133,7 @@ public:
 
     QString selfPhone() const;
 
+    QMap<quint32, TLUser*> userList() const;
     QStringList contactList() const;
     QVector<quint32> publicChatIdList() const;
 
@@ -212,6 +213,8 @@ signals:
     void messageMediaDataReceived(const QString &contact, quint32 messageId, const QByteArray &data, const QString &mimeType, TelegramNamespace::MessageType type, quint32 offset, quint32 size);
 
     void messageReceived(const TelegramNamespace::Message &message);
+
+    void updateReadHistoryInbox(quint32 userId, quint32 chatId, quint32 pts);
 
 #ifndef TELEGRAMQT_NO_DEPRECATED
     void phoneStatusReceived(const QString &phone, bool registered, bool invited);

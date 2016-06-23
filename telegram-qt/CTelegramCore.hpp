@@ -1,4 +1,4 @@
-/*
+﻿/*
    Copyright (C) 2014-2015 Alexandr Akulich <akulichalexander@gmail.com>
 
    This file is a part of TelegramQt library.
@@ -20,6 +20,7 @@
 
 #include "telegramqt_export.h"
 #include "TelegramNamespace.hpp"
+#include "TLTypes.hpp"
 
 #include <QObject>
 #include <QVector>
@@ -45,6 +46,7 @@ public:
 
     Q_INVOKABLE TelegramNamespace::ConnectionState connectionState() const;
     Q_INVOKABLE QString selfPhone() const;
+    QMap<quint32, TLUser*> userList() const;
     Q_INVOKABLE QStringList contactList() const;
     Q_INVOKABLE QList<quint32> chatList() const;
     Q_INVOKABLE TelegramNamespace::ContactStatus contactStatus(const QString &contact) const;
@@ -153,6 +155,8 @@ Q_SIGNALS:
                                   const QString &mimeType, TelegramNamespace::MessageType type, quint32 offset, quint32 size);
 
     void messageReceived(const TelegramNamespace::Message &message);
+
+    void updateReadHistoryInbox(quint32 userId, quint32 chatId, quint32 pts);
 
 #ifndef TELEGRAMQT_NO_DEPRECATED
     void phoneStatusReceived(const QString &phone, bool registered, bool invited);

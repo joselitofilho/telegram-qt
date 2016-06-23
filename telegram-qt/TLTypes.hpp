@@ -1493,6 +1493,7 @@ struct TLGeochatsStatedMessage {
 struct TLMessage {
     TLMessage() :
         id(0),
+        userId(0),
         flags(0),
         fromId(0),
         fwdFromId(0),
@@ -1502,6 +1503,7 @@ struct TLMessage {
         tlType(TLValue::MessageEmpty) { }
 
     quint32 id;
+    quint32 userId;
     quint32 flags;
     quint32 fromId;
     TLPeer toId;

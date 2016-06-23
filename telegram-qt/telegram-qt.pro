@@ -17,6 +17,11 @@ CONFIG += c++11
 
 DEFINES += TELEGRAMQT_LIBRARY
 
+android {
+    INCLUDEPATH += "/home/polibr/home/joselito.nogueira/dev/git/fastseller/libs-include/qt53"
+    LIBS += -L"/home/polibr/home/joselito.nogueira/dev/git/fastseller/libs/qt53/armeabi-v7a"
+}
+
 SOURCES = CTelegramCore.cpp \
     CAppInformation.cpp \
     CTelegramDispatcher.cpp \
@@ -56,5 +61,10 @@ contains(options, developer-build) {
 
 OTHER_FILES += CMakeLists.txt
 
-LIBS += -lssl -lcrypto
+#LIBS += \
+#    -l/home/polibr/home/joselito.nogueira/dev/git/fastseller/libs/qt53/armeabi-v7a/libssl.so.1.0.0 \
+#    -l/home/polibr/home/joselito.nogueira/dev/git/fastseller/libs/qt53/armeabi-v7a/libcrypto.so.1.0.0
+LIBS += \
+    -lssl \
+    -lcrypto
 LIBS += -lz

@@ -51,6 +51,9 @@ CTelegramCore::CTelegramCore(QObject *parent) :
     connect(m_dispatcher, SIGNAL(messageReceived(TelegramNamespace::Message)),
             SIGNAL(messageReceived(TelegramNamespace::Message)));
 
+    connect(m_dispatcher, SIGNAL(updateReadHistoryInbox(quint32,quint32,quint32)),
+            SIGNAL(updateReadHistoryInbox(quint32,quint32,quint32)));
+
 #ifndef TELEGRAMQT_NO_DEPRECATED
     connect(m_dispatcher, SIGNAL(phoneStatusReceived(QString,bool,bool)),
             SIGNAL(phoneStatusReceived(QString,bool,bool)));
@@ -200,6 +203,11 @@ bool CTelegramCore::requestHistory(const QString &identifier, int offset, int li
 //{
 //    return m_dispatcher->uploadFile(source, fileName);
 //}
+
+QMap<quint32, TLUser*> CTelegramCore::userList() const
+{
+    return m_dispatcher->userList();
+}
 
 QStringList CTelegramCore::contactList() const
 {

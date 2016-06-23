@@ -291,6 +291,11 @@ QString CTelegramDispatcher::selfPhone() const
     return m_users.value(m_selfUserId)->phone;
 }
 
+QMap<quint32, TLUser*> CTelegramDispatcher::userList() const
+{
+    return m_users;
+}
+
 QStringList CTelegramDispatcher::contactList() const
 {
     QStringList result;
@@ -1120,7 +1125,9 @@ bool CTelegramDispatcher::getChatParticipants(QStringList *participants, quint32
 void CTelegramDispatcher::whenUsersReceived(const QVector<TLUser> &users)
 {
     qDebug() << Q_FUNC_INFO << users.count();
+
     foreach (const TLUser &user, users) {
+        qDebug() << Q_FUNC_INFO << "JOSELITO usuário: " << user.id << "/" << user.phone;
         TLUser *existsUser = m_users.value(user.id);
 
         if (existsUser) {
@@ -1154,7 +1161,6 @@ void CTelegramDispatcher::whenContactListReceived(const QVector<quint32> &contac
 
 void CTelegramDispatcher::whenContactListChanged(const QVector<quint32> &added, const QVector<quint32> &removed)
 {
-    qDebug() << Q_FUNC_INFO << added << removed;
     QVector<quint32> newContactList = m_contactList;
 
     // There is some redundant checks, but let's be paranoid
@@ -1452,10 +1458,11 @@ void CTelegramDispatcher::processUpdate(const TLUpdate &update)
     quint32 newPts = m_updatesState.pts;
 
     switch (update.tlType) {
+    case TLValue::UpdateReadHistoryInbox:
+        emit updateReadHistoryInbox(update.peer.userId, update.peer.chatId, update.pts);
+    case TLValue::UpdateReadHistoryOutbox:
     case TLValue::UpdateNewMessage:
     case TLValue::UpdateReadMessagesContents:
-    case TLValue::UpdateReadHistoryInbox:
-    case TLValue::UpdateReadHistoryOutbox:
     case TLValue::UpdateDeleteMessages:
         // Official client also have TLValue::UpdateWebPage here. Why the hell?
         if (m_updatesState.pts + update.ptsCount != update.pts) {
@@ -1478,7 +1485,7 @@ void CTelegramDispatcher::processUpdate(const TLUpdate &update)
 //        update.id;
 //        update.randomId;
 //        break;
-//    case TLValue::UpdateReadMessages:
+//      case TLValue::UpdateReadMessages:
 //        foreach (quint32 messageId, update.messages) {
 //            const QPair<QString, quint64> phoneAndId = m_messagesMap.value(messageId);
 //            emit sentMessageStatusChanged(phoneAndId.first, phoneAndId.second, TelegramNamespace::MessageDeliveryStatusRead);
@@ -1734,24 +1741,58 @@ void CTelegramDispatcher::processMessageReceived(const TLMessage &message)
 
     TelegramNamespace::Message apiMessage;
 
+    qDebug() << "JOSELITO TELEGRAM "
+             << "FLAG: " << message.flags
+             << "unread?" << (message.flags & 0x1)
+             << "userID" << message.userId
+             << "fromID" << message.fromId
+             << "toID.userId" << message.toId.userId
+             << "toID.chatId" << message.toId.chatId
+             << "toID.tlType" << message.toId.tlType
+             << "fwdFromID" << message.fwdFromId;
+
+    // TODO: Implementar adequadamente as combinações de recebimento de mensagem.
+    // Mensagens de usuários online: userId != 0
+    // Mensagens de usuários offline: userId == 0 -> fromId / toId.userId
+    // Mensagens de chat online:
+    // Mensagens de chat offline:
+
+
     TelegramNamespace::MessageFlags messageFlags = getPublicMessageFlags(message);
     if (messageFlags & TelegramNamespace::MessageFlagForwarded) {
         apiMessage.fwdContact = userIdToIdentifier(message.fwdFromId);
         apiMessage.fwdTimestamp = message.fwdDate;
     }
 
+    apiMessage.userId = message.userId;
+    if (apiMessage.userId == 0) {
+        apiMessage.userId = message.fromId;
+    }
     if ((message.toId.tlType == TLValue::PeerChat) || (messageFlags & TelegramNamespace::MessageFlagOut)) {
+        apiMessage.userId = message.fromId;
+        apiMessage.chatId = message.toId.chatId;
         apiMessage.peer = peerToIdentifier(message.toId);
     } else {
-        apiMessage.peer = userIdToIdentifier(message.fromId);
+        apiMessage.peer = userIdToIdentifier(message.userId);
     }
 
-    apiMessage.contact = userIdToIdentifier(message.fromId);
+    apiMessage.contact = userIdToIdentifier(apiMessage.userId);
     apiMessage.type = messageType;
     apiMessage.text = message.message;
     apiMessage.id = message.id;
     apiMessage.timestamp = message.date;
     apiMessage.flags = messageFlags;
+
+    qDebug() << "JOSELITO MENSAGEM!"
+             << "#id" << apiMessage.id
+             << "#userId" << apiMessage.userId
+             << "#chatId" << apiMessage.chatId
+             << "#peer" << apiMessage.peer
+             << "#contact" << apiMessage.contact
+             << "#text" << apiMessage.text
+             << "#date" << apiMessage.timestamp
+             << "#flags" << apiMessage.flags
+             << "#unread?" << !apiMessage.flags.testFlag(TelegramNamespace::MessageFlagRead);
 
     emit messageReceived(apiMessage);
 
@@ -2301,16 +2342,20 @@ void CTelegramDispatcher::whenUpdatesReceived(const TLUpdates &updates)
     case TLValue::UpdateShortMessage:
     case TLValue::UpdateShortChatMessage:
     {
+        // TODO: Joselito - Para que server isso???
         if (m_updatesState.pts + updates.ptsCount != updates.pts) {
             qDebug() << "Need to get difference.";
-            Q_ASSERT(0);
-            break;
+//            Q_ASSERT(0);
+//            break;
         }
+
         TLMessage shortMessage;
         shortMessage.tlType = TLValue::Message;
         shortMessage.id = updates.id;
-//        shortMessage.flags = TelegramMessageFlagUnread;
+        shortMessage.userId = updates.userId;
+        shortMessage.flags = updates.flags;//TelegramMessageFlagUnread;
         shortMessage.fromId = updates.fromId;
+        shortMessage.fwdFromId = updates.fwdFromId;
         shortMessage.message = updates.message;
         shortMessage.date = updates.date;
         shortMessage.media.tlType = TLValue::MessageMediaEmpty;
@@ -2503,6 +2548,14 @@ bool CTelegramDispatcher::havePublicChatId(quint32 publicChatId) const
 TelegramNamespace::MessageFlags CTelegramDispatcher::getPublicMessageFlags(const TLMessage &message)
 {
     TelegramNamespace::MessageFlags result = TelegramNamespace::MessageFlagNone;
+
+    if ((message.flags & 0x1) == 0) {
+        result |= TelegramNamespace::MessageFlagRead;
+    }
+
+    if (message.flags & 0x2) {
+        result |= TelegramNamespace::MessageFlagOut;
+    }
 
     if (message.fromId == m_selfUserId) {
         result |= TelegramNamespace::MessageFlagOut;
