@@ -14,7 +14,7 @@ contains(options, static-lib) {
     CONFIG  += dll
 }
 
-CONFIG += c++11
+#CONFIG += c++11
 
 DEFINES += TELEGRAMQT_LIBRARY
 
